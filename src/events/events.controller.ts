@@ -51,7 +51,6 @@ export class EventsController {
   async findOne(@Param('id', ParseIntPipe) id: number) {
     return await this.repository.findOneBy({ id: id });
   }
-
   @Post()
   async create(@Body() input: CreateEventDto) {
     return await this.repository.save({
