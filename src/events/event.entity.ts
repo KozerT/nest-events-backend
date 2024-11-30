@@ -22,4 +22,10 @@ export class Event {
     cascade: true,
   })
   attendees: Attendee[];
+
+  //Those are virtual properties that  are never stored and never loaded to tge the database
+  attendeeCount?: number;
+  attendeeRejected?: number;
+  attendeeMaybe?: number;
+  attendeeAccepted?: number;
 }
