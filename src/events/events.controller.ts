@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  ForbiddenException,
   Get,
   HttpCode,
   InternalServerErrorException,
@@ -112,23 +113,37 @@ export class EventsController {
   }
 
   @Patch(':id')
-  async update(@Param('id') id, @Body() input: UpdateEventDto) {
-    const event = await this.repository.findOneBy({ id: id });
+  @UseGuards(AuthGuardJwt)
+  async update(
+    @Param('id') id,
+    @Body() input: UpdateEventDto,
+    @CurrentUser() user: User,
+  ) {
+    const event = await this.eventService.getEvent(id);
     if (!event) {
       throw new NotFoundException(`Event with ID ${id} not found`);
     }
-    return await this.repository.save({
-      ...event,
-      ...input,
-      when: input.when ? new Date(input.when) : event.when,
-    });
+
+    if (event.organizerId !== user.id) {
+      throw new ForbiddenException(null, 'Unauthorized to update this event');
+    }
+
+    return await this.eventService.updateEvent(id, input);
   }
   @Delete('/:id')
+  @UseGuards(AuthGuardJwt)
   @HttpCode(204)
-  async remove(@Param('id') id) {
-    const result = await this.eventService.deleteEvent(id);
+  async remove(@Param('id') id, @CurrentUser() user: User) {
+    const event = await this.eventService.getEvent(id);
 
-    if (result?.affected !== 1)
+    if (!event) {
       throw new NotFoundException(`Event with ID ${id} not found`);
+    }
+
+    if (event.organizerId !== user.id) {
+      throw new ForbiddenException(null, 'Unauthorized to delete this event');
+    }
+
+    await this.eventService.deleteEvent(id);
   }
 }
