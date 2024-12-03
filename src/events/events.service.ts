@@ -97,7 +97,7 @@ export class EventsService {
   public async getEventsWithAttendeeCountFilteredPaginated(
     filter: ListEvents,
     paginateOptions: PaginateOptions,
-  ) {
+  ): Promise<PaginatedEvents> {
     return await paginate(
       await this.getEventsWithAttendeeCountFiltered(filter),
       paginateOptions,
@@ -141,6 +141,21 @@ export class EventsService {
       .where('e.id = :id', { id })
       .execute();
   }
-}
 
+  public async getEventsOrganizedByUserIdPaginated(
+    userId: number,
+    paginateOptions: PaginateOptions,
+  ): Promise<PaginatedEvents> {
+    return await paginate<Event>(
+      this.getEventsOrganizedByUserIdQuery(userId),
+      paginateOptions,
+    );
+  }
+
+  private getEventsOrganizedByUserIdQuery(userId: number) {
+    return this.getEventBaseQuery()
+      .where('e.organizerId = :userId', { userId })
+      .orderBy('e.id', 'DESC');
+  }
+}
 export type PaginatedEvents = PaginationResult<Event>;
