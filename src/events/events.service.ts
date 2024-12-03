@@ -157,5 +157,21 @@ export class EventsService {
       .where('e.organizerId = :userId', { userId })
       .orderBy('e.id', 'DESC');
   }
+  public async getEventsAttendedByUserIdPaginated(
+    userId: number,
+    paginateOptions: PaginateOptions,
+  ): Promise<PaginatedEvents> {
+    return await paginate<Event>(
+      this.getEventsAttendedByUserIdQuery(userId),
+      paginateOptions,
+    );
+  }
+
+  //The method returns events attended by the userId it gets
+  private getEventsAttendedByUserIdQuery(userId: number) {
+    return this.getEventBaseQuery()
+      .leftJoinAndSelect('e.attendees', 'a')
+      .where('a.userId = :userId', { userId });
+  }
 }
 export type PaginatedEvents = PaginationResult<Event>;
