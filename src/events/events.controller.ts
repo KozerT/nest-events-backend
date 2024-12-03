@@ -33,6 +33,7 @@ import { CurrentUser } from 'src/auth/current-user.decorator';
 import { User } from 'src/auth/user.entity';
 import { AuthGuardJwt } from 'src/auth/auth-guard.jwt';
 
+// Only one thing controllers should do getting the input from the user and returning the response
 @Controller('/events')
 @SerializeOptions({ strategy: 'excludeAll' })
 export class EventsController {
